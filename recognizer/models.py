@@ -4,60 +4,65 @@ from django.utils.text import slugify
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save, post_save
 
+from login_with_face.settings import BASE_DIR
+
 import os
 
 from .utils import random_string_generator
 
 
 def user_image_path(instance, filename):
-    name, ext = filename.split('.')
+    
+    extension = "." + filename.split('.')[-1]
     name = instance.user.first_name + instance.unique_id
-    filename = name + '.' + ext
-    return 'User_images/{}/{}'.format(instance.gender, filename)
-
-
-def unique_id_generator(instance, new_id=None):
+    filename = name + extension 
+    
+    path = 'User_images/{}/'.format(instance.gender)
+    return os.path.join(path , filename)
+                    
+                    
+                    
+def unique_id_generator(instance):
     """
     This is for a Django project and it assumes your instance 
     has a model with a slug field and a title character (char) field.
-    """
-    if new_id is not None:
-        unique_id = new_id
-    else:
-        unique_id = slugify(instance.user.username)
-
+        """
+    new_id = random_string_generator(size=12)
     Klass = instance.__class__
-    qs_exists = Klass.objects.filter(unique_id=unique_id).exists()
+    qs_exists = Klass.objects.filter(unique_id=new_id).exists()
     if qs_exists:
-        new_slug = "{unique_id}-{randstr}".format(
-                    unique_id=unique_id,
-                    randstr=random_string_generator(size=4)
+        new_slug = "{randstr}".format(
+                    randstr=random_string_generator(size=12)
                 )
-        return unique_id_generator(instance, new_slug=new_slug)
-    return unique_id
+        return new_slug
+    else:
+        return new_id
+
+
 
 
 class UserProfile(models.Model):
     
     GENDER_CHOICES = (
-        ('MALE','M'),
-        ('FEMALE','F'),
-        ('OTHER', 'O')
+        ('M','MALE'),
+        ('F','FEMALE'),
+        ('O', 'OTHER')
     )
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    unique_id = models.CharField(null=True, blank=True, max_length=120)
-    image = models.ImageField(upload_to=user_image_path, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_profile')
+    unique_id = models.CharField(null=True, blank=True, max_length=120) 
     gender = models.CharField(choices=GENDER_CHOICES, max_length=2)
     birth_date = models.DateField(auto_now_add=True, null=True)
+    image = models.ImageField(upload_to=user_image_path, null=True, blank=True)
     
     def __str__(self):
-        return str(self.unique_id+ ' ' + self.user.username)
+        return str(self.user.username)
+ 
     
     
-    
-def product_pre_save_receiver(sender, instance, *args, **kwargs):
-    if not instance.slug:
-        instance.slug = unique_slug_generator(instance)
+def user_post_save_receiver(sender, instance, *args, **kwargs):
+    obj = UserProfile.objects.create(user=instance)
+    obj.unique_id = unique_id_generator(obj)
+    obj.save()
 
-pre_save.connect(product_pre_save_receiver, sender=Item)
+post_save.connect(user_post_save_receiver, sender=User)
