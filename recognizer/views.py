@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, HttpResponse, redirect, get_object_or_404, reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
@@ -34,6 +34,10 @@ def login_view(request):
             
             if user is not None:
                 login(request, user=user)
+                
+                uqid = get_uqid(request)
+                request.session['uqid'] = uqid
+                
                 login_form = AuthenticationForm(request.POST or None)
                 context['form'] = login_form
                 return redirect('recognizer:home')
@@ -41,7 +45,6 @@ def login_view(request):
                 messages.error(request, 'User not found signup first!')
                 return render(request, 'recognizer/login.html', context=context)
             
-    context = {}
     return render(request, 'recognizer/login.html', context=context)
 
 
@@ -66,33 +69,72 @@ def signup_view(request):
                 signup_form = AuthenticationForm(request.POST or None)
                 context['form'] = signup_form
                 messages.success(request, "Sign up Sucsessful")
+                
+                uqid = get_uqid(request=request)
+                request.session['uqid'] = uqid
                 return redirect('recognizer:home')
             else:
                 messages.error(request, 'User already exists!')
                 context['form'] = signup_form
                 return render(request, 'recognizer/signup.html', context=context)
                 
-
-                
     return HttpResponse('sign up')
 
-
+@login_required(login_url='recognizer:login')
 def update_profile(request, pk=None):
-    return HttpResponse('update_profile')
+    instance = get_object_or_404(UserProfile, pk=pk)
+    edit_form = UserProfileForm(request.POST or None, instance=instance)
+    context = {
+        'form':edit_form,
+    }
+    if request.POST:
+        if edit_form.is_valid():
+            user = edit_form.save()
+            messages.success(request, "Profile Edited Sucsessfuly")
+            request.session['uqid'] = user.unique_id
+            return redirect("recognizer:profile", kwargs={ 'pk':pk })
+        else:
+            context = {
+                'form':edit_form,
+            }
+            messages.error(request, "Somthing is wrong , i can feel it")
+    return render(request, 'recognizer/profile-form.html', context=context)
 
 
+@login_required(login_url='recognizer:login')
 def profile_view(request, pk=None):
-    return HttpResponse('profile')
+    instance = get_object_or_404(UserProfile, pk=pk)
+    context = {}
+    if request.user == instance.user or request.user.is_staff:
+        context['object'] = instance
+    return render(request, 'recognizer/profile.html', context=context)
 
 
+@login_required(login_url='recognizer:login')
+def logout_confirm_view(request):
+    context = {}
+    context['view'] = 'Logout'
+    context['msg'] = 'Wanna Logout??'
+    return render(request, 'recognizer/anything-confirm.html', context=context)
+
+
+@login_required(login_url='recognizer:login')
 def logout_view(request):
-    return HttpResponse('logout')
+    logout(request)
+    messages.success(request, "Logout Sucsessful")
+    return reverse('recognizer:home')
 
 
 
-@login_required(login_url = 'login')
+@login_required(login_url = 'recognizer:login')
 def login_with_face(request):
     if request.method == 'POST':
         details = {
             'branch':request.user.user_profile['gender'],
             }
+    return HttpResponse('Hey!')
+
+
+def get_uqid(request):
+    user = UserProfile.objects.get(user=request.user)
+    return user.unique_id

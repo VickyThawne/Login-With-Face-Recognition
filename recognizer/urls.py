@@ -8,6 +8,8 @@ from .views import (
     update_profile,
     profile_view,
     logout_view,
+    logout_confirm_view,
+    login_with_face,
 )
 
 app_name = 'recognizer'
@@ -17,6 +19,7 @@ urlpatterns = [
     path('login/', login_view, name='login'),
     path('signup/', signup_view, name='signup'),
     path('logout/', logout_view, name='logout'),
+    path('logout-confirm/', logout_confirm_view, name='logout-cnf'),
     path('update-profile/<int:pk>', update_profile, name='update-profile'),
     path('profile/<int:pk>', profile_view, name='profile'),
     
