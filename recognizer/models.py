@@ -61,8 +61,19 @@ class UserProfile(models.Model):
     
     
 def user_post_save_receiver(sender, instance, *args, **kwargs):
-    obj = UserProfile.objects.create(user=instance)
-    obj.unique_id = unique_id_generator(obj)
-    obj.save()
+    obj = UserProfile.objects.get(user=instance)
+    if obj is not None:
+        pass
+    else:
+        obj = UserProfile.objects.create(user=instance)
+        
+    try:    
+        if obj.unique_id:
+            obj.unique_id = unique_id_generator(obj)
+            obj.save()
+        else:
+            pass
+    except:
+        pass
 
 post_save.connect(user_post_save_receiver, sender=User)

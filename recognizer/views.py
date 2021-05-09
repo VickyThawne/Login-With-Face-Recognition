@@ -17,7 +17,7 @@ from django.contrib.auth import (
 def home_view(request):
     context = {}
     context['data'] = 'some data'
-    return render(request, 'recognizer/home.html', context={})
+    return render(request, 'recognizer/home.html', context=context)
 
 
 def login_view(request):
@@ -34,12 +34,13 @@ def login_view(request):
             
             if user is not None:
                 login(request, user=user)
-                
+                messages.success(request, 'login sucsessful!')
                 uqid = get_uqid(request)
                 request.session['uqid'] = uqid
                 
                 login_form = AuthenticationForm(request.POST or None)
                 context['form'] = login_form
+                
                 return redirect('recognizer:home')
             else:
                 messages.error(request, 'User not found signup first!')
@@ -63,9 +64,10 @@ def signup_view(request):
             
             user = authenticate(request, username=username, email=email, password=password)
             if user is None:
-                user = User.objects.create(username=username, email=email)
-                user.set_password(password)
+                user = User.objects.create(username=username, email=email, password=password)
+                # user.set_password(password)
                 user.save()
+                
                 signup_form = AuthenticationForm(request.POST or None)
                 context['form'] = signup_form
                 messages.success(request, "Sign up Sucsessful")
@@ -78,7 +80,7 @@ def signup_view(request):
                 context['form'] = signup_form
                 return render(request, 'recognizer/signup.html', context=context)
                 
-    return HttpResponse('sign up')
+    return render(request, 'recognizer/signup.html', context=context)
 
 @login_required(login_url='recognizer:login')
 def update_profile(request, pk=None):
@@ -122,7 +124,7 @@ def logout_confirm_view(request):
 def logout_view(request):
     logout(request)
     messages.success(request, "Logout Sucsessful")
-    return reverse('recognizer:home')
+    return redirect('recognizer:home')
 
 
 
