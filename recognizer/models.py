@@ -56,7 +56,8 @@ class UserProfile(models.Model):
     image = models.ImageField(upload_to=user_image_path, null=True, blank=True)
     
     def __str__(self):
-        return str(self.user.username)
+        name = self.user.username + str(self.pk)
+        return "{} {}".format(self.user.username, self.pk)
  
     
     

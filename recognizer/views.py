@@ -83,26 +83,6 @@ def signup_view(request):
                 
     return render(request, 'recognizer/signup.html', context=context)
 
-@login_required(login_url='recognizer:login')
-def update_profile(request, pk=None):
-    instance = get_object_or_404(UserProfile, pk=pk)
-    edit_form = UserProfileForm(request.POST or None, instance=instance)
-    context = {
-        'form':edit_form,
-    }
-    if request.POST:
-        if edit_form.is_valid():
-            user = edit_form.save()
-            messages.success(request, "Profile Edited Sucsessfuly")
-            request.session['uqid'] = user.unique_id
-            return redirect("recognizer:profile", kwargs={ 'pk':pk })
-        else:
-            context = {
-                'form':edit_form,
-            }
-            messages.error(request, "Somthing is wrong , i can feel it")
-    return render(request, 'recognizer/profile-form.html', context=context)
-
 
 @login_required(login_url='recognizer:login')
 def profile_view(request, pk=None):
@@ -111,6 +91,31 @@ def profile_view(request, pk=None):
     if request.user == instance.user or request.user.is_staff:
         context['object'] = instance
     return render(request, 'recognizer/profile.html', context=context)
+
+
+@login_required(login_url='recognizer:login')
+def update_profile(request, pk=None):
+    instance = get_object_or_404(UserProfile, pk=pk)
+    if instance.user == request.user:
+        edit_form = UserProfileForm(request.POST or None, instance=instance)
+        context = {
+            'form':edit_form,
+        }
+        if request.POST:
+            if edit_form.is_valid():
+                user = edit_form.save()
+                messages.success(request, "Profile Edited Sucsessfuly")
+                request.session['uqid'] = user.unique_id
+                return redirect("recognizer:profile", kwargs={'pk': pk})
+            else:
+                context = {
+                    'form':edit_form,
+                }
+                messages.error(request, "Somthing is wrong , i can feel it")
+    else:
+        messages.error(request, "Somthing is wrong , i can feel it part 2")
+    return render(request, 'recognizer/profile_form.html', context=context)
+
 
 
 @login_required(login_url='recognizer:login')
