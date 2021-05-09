@@ -4,6 +4,7 @@ from django.contrib import messages
 
 from .models import UserProfile, User
 from .forms import UserProfileForm, AuthenticationForm
+from .recognizer import recognizer
 
 from django.contrib.auth import (
     login,
@@ -128,15 +129,30 @@ def logout_view(request):
 
 
 
-@login_required(login_url = 'recognizer:login')
-def login_with_face(request):
-    if request.method == 'POST':
-        details = {
-            'branch':request.user.user_profile['gender'],
-            }
-    return HttpResponse('Hey!')
-
-
 def get_uqid(request):
     user = UserProfile.objects.get(user=request.user)
     return user.unique_id
+
+
+@login_required(login_url = 'recognizer:login')
+def login_with_face(request):
+    context = {}
+    if request.method == 'POST':
+        user = UserProfile.objects.get(user=request.user)
+
+        gender = user.gender
+        details = {
+            'gender':gender,
+            }
+        names, known_names = recognizer(details)
+        if str(request.user.first_name + user.unique_id) in names:
+            context['login_detail'] = True
+            messages.success(request, 'now you canwatch premium content')
+            return redirect('recognizer:home')
+        else:
+            context['login_detail'] = False
+            messages.error(request, 'stfu b** get your ass out of my website..')
+            return redirect('recognizer:home')
+    return render(request, 'recognizer/home.html', context=context)
+        
+    

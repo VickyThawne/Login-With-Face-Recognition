@@ -22,5 +22,6 @@ urlpatterns = [
     path('logout-confirm/', logout_confirm_view, name='logout-cnf'),
     path('update-profile/<int:pk>', update_profile, name='update-profile'),
     path('profile/<int:pk>', profile_view, name='profile'),
+    path('login-with-face', login_with_face, name='login-with-face')
     
 ]

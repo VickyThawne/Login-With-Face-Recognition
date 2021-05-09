@@ -16,6 +16,13 @@
 
 
 {% endif %}
+
 {{ data }}
+
+<form method='POST' action="{% url 'recognizer:login-with-face' %}">
+{% csrf_token %}
+<input class='form-control' type='submit' value='submit'>
+</form>
+
 
 {% endblock %}
