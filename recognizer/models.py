@@ -14,7 +14,7 @@ from .utils import random_string_generator
 def user_image_path(instance, filename):
     
     extension = "." + filename.split('.')[-1]
-    name = ( instance.user.first_name + instance.unique_id )
+    name = ( instance.user.username + instance.unique_id )
     filename = name + extension 
     
     path = 'User_images/{}/'.format(instance.gender)

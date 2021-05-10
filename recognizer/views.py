@@ -4,7 +4,7 @@ from django.contrib import messages
 
 from .models import UserProfile, User
 from .forms import UserProfileForm, AuthenticationForm
-from .recognizer import recognizer
+from .recognizer import recognizer, Recognizer
 
 from django.contrib.auth import (
     login,
@@ -153,9 +153,8 @@ def login_with_face(request):
         except:
             details = None
         
-        names, known_names = recognizer(details)
-        print(names)
-        print('\n', known_names)
+        names = Recognizer(details)
+        
         if str(request.user.first_name + user.unique_id) in names:
             context['login_detail'] = True
             messages.success(request, 'now you canwatch premium content')

@@ -18,9 +18,11 @@ class AuthenticationForm(forms.Form):
         
         
 class UserProfileForm(forms.ModelForm):
+    image = forms.ImageField(error_messages={'required': 'Please Upload clear photo of your self!'})
     class Meta():
         model = UserProfile
         exclude = ['unique_id', 'user']
+
         
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
