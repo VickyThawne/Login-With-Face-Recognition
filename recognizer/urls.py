@@ -5,7 +5,7 @@ from .views import (
     home_view,
     login_view,
     signup_view,
-    update_profile,
+    update_profile_view,
     profile_view,
     logout_view,
     logout_confirm_view,
@@ -21,7 +21,7 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('logout-confirm/', logout_confirm_view, name='logout-cnf'),
     path('profile/<int:pk>', profile_view, name='profile'),
-    path('profile/<int:pk>/update', update_profile, name='update-profile'),
+    path('profile/<int:pk>/update', update_profile_view, name='update-profile'),
     path('login-with-face', login_with_face, name='login-with-face')
     
 ]

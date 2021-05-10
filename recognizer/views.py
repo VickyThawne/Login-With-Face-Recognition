@@ -94,10 +94,10 @@ def profile_view(request, pk=None):
 
 
 @login_required(login_url='recognizer:login')
-def update_profile(request, pk=None):
+def update_profile_view(request, pk=None):
     instance = get_object_or_404(UserProfile, pk=pk)
-    if instance.user == request.user:
-        edit_form = UserProfileForm(request.POST or None, instance=instance)
+    edit_form = UserProfileForm(request.POST or None, instance=instance)
+    if instance.user == request.user or request.user.is_superuser:
         context = {
             'form':edit_form,
         }
@@ -106,7 +106,7 @@ def update_profile(request, pk=None):
                 user = edit_form.save()
                 messages.success(request, "Profile Edited Sucsessfuly")
                 request.session['uqid'] = user.unique_id
-                return redirect("recognizer:profile", kwargs={'pk': pk})
+                return reverse("recognizer:profile", kwargs={'pk': pk})
             else:
                 context = {
                     'form':edit_form,
@@ -143,13 +143,19 @@ def get_uqid(request):
 def login_with_face(request):
     context = {}
     if request.method == 'POST':
-        user = UserProfile.objects.get(user=request.user)
+        try:
+            user = UserProfile.objects.get(user=request.user)
 
-        gender = user.gender
-        details = {
+            gender = user.gender
+            details = {
             'gender':gender,
             }
+        except:
+            details = None
+        
         names, known_names = recognizer(details)
+        print(names)
+        print('\n', known_names)
         if str(request.user.first_name + user.unique_id) in names:
             context['login_detail'] = True
             messages.success(request, 'now you canwatch premium content')
@@ -158,6 +164,8 @@ def login_with_face(request):
             context['login_detail'] = False
             messages.error(request, 'stfu b** get your ass out of my website..')
             return redirect('recognizer:home')
+        
+        
     return render(request, 'recognizer/home.html', context=context)
         
     

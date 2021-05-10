@@ -2,19 +2,22 @@
 
 
 {% block body_block %}
+
 {% for message in messages %}
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
         <b><center>{{ message }}</center> </b>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 {% endfor %}
-
-
-<form method='POST' action="{% url 'recognizer:update-profile' pk=object.pk %}">
+<br>
+</br>
+<div class='container-sm'>
+<form method='POST' class='form-control' enctype="multipart/form-data">
 {% csrf_token %}
-{{ form.as_p }
+{{ form.as_p }}
 <input class='form-control' type='submit' value='submit'>
 </form>
+</div>
 
 {% endblock %}
 

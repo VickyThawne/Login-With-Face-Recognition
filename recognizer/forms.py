@@ -20,7 +20,7 @@ class AuthenticationForm(forms.Form):
 class UserProfileForm(forms.ModelForm):
     class Meta():
         model = UserProfile
-        exclude = ['unique_id']
+        exclude = ['unique_id', 'user']
         
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
