@@ -54,6 +54,7 @@ class UserProfile(models.Model):
     gender = models.CharField(choices=GENDER_CHOICES, max_length=2)
     birth_date = models.DateField(auto_now_add=True, null=True)
     image = models.ImageField(upload_to=user_image_path, null=True, blank=True)
+    login_proceed = models.BooleanField(default=False)
     
     def __str__(self):
         name = self.user.username + str(self.pk)

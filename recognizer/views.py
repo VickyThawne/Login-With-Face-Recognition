@@ -128,6 +128,8 @@ def logout_confirm_view(request):
 
 @login_required(login_url='recognizer:login')
 def logout_view(request):
+    user = UserProfile.objects.get(user=request.user)
+    user.login_proceed = False
     logout(request)
     messages.success(request, "Logout Sucsessful")
     return redirect('recognizer:home')
@@ -149,18 +151,23 @@ def login_with_face(request):
             gender = user.gender
             details = {
             'gender':gender,
+            'username':user.user.username,
+            'unique_id':user.unique_id,
+            'user':user,
             }
         except:
             details = None
         
-        names = Recognizer(details)
+        names, known_lables, login_proceed = Recognizer(details, username=user.user.username, unique_id=user.unique_id)
         
-        if str(request.user.first_name + user.unique_id) in names:
+        if str(request.user.username + user.unique_id) in names:
             context['login_detail'] = True
+            user.login_proceed = login_proceed
             messages.success(request, 'now you canwatch premium content')
             return redirect('recognizer:home')
         else:
             context['login_detail'] = False
+            user.login_proceed = login_proceed
             messages.error(request, 'stfu b** get your ass out of my website..')
             return redirect('recognizer:home')
         

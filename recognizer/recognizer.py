@@ -31,12 +31,12 @@ def recognizer(details, username, unique_id):
         
 
     for root, dirs, files in os.walk(image_dir):
-        for f in files:
-            if f.endswith('jpg') or f.endswith('png'):
-                path = os.path.join(root, f)  # file no path 
+        for file in files:
+            if file.endswith('jpg') or file.endswith('png'):
+                path = os.path.join(root, file)  # file no path 
                 img = face_recognition.load_image_file(path)
                 
-                known_lable = f[:len(f)-4]
+                known_lable = file[:len(file)-4]
                 known_face_lables.append(known_lable)  # janita face na lable taiyar
                 
                 known_location = face_recognition.face_locations(img, model='hog')
@@ -47,7 +47,7 @@ def recognizer(details, username, unique_id):
                     print(known_lable, "can't be encoded")
                     continue
                 else:
-                    known_face_encodings.append(known_encoding)  # janita face na encodings taiyar
+                    known_face_encodings.append(known_encoding[0])  # janita face na encodings taiyar
     
     # ----------------------------------------------------------------------- #
                 
@@ -74,14 +74,21 @@ def recognizer(details, username, unique_id):
             video_face_encoding = face_recognition.face_encodings(rgb_small_frame,
                                         video_face_location
                                     )
-            if not len(video_face_encoding):
+            if len(video_face_encoding) == 0:
                 print("video_face_encoding can't be encoded")
                 continue
             else:
-                video_face_encoding = video_face_encoding[0]
+                video_face_encoding = video_face_encoding
             
             
             for face_enc in video_face_encoding:
+                
+                matches = face_recognition.compare_faces(
+                        known_face_encodings,
+                        np.array(face_enc),
+                        tolerance = 0.6
+                        )
+                face_distances = face_recognition.face_distance(known_face_encodings,face_enc)	
                 
                 try:
                     matches = face_recognition.compare_faces(
@@ -95,10 +102,11 @@ def recognizer(details, username, unique_id):
                     
                     if matches[best_match_index]:
                         name = known_face_lables[best_match_index]
-                        je_video_ma_malya_enu_naam.append()
+                        if name not in je_video_ma_malya_enu_naam:
+                            je_video_ma_malya_enu_naam.append(name)
                 
                 except:
-                    print('compairing went wrong..')
+                    pass
                 
             # jo video ma thobdu malyu pan verified nathi to
             if len(je_video_ma_malya_enu_naam) == 0:
@@ -116,7 +124,7 @@ def recognizer(details, username, unique_id):
                     cv2.putText(frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
                     
             #jo video ma thobdu malyu ane verified 6e
-            else if (user.username+unique_id) in name:
+            elif (username+unique_id) in je_video_ma_malya_enu_naam:
                 for (top, right, bottom, left), name in video_face_locations, je_video_ma_malya_enu_naam:
                     
                     top*=2
@@ -157,6 +165,7 @@ def recognizer(details, username, unique_id):
     cap.release()
     cv2.destroyAllWindows()
     
+    print(je_video_ma_malya_enu_naam, known_face_lables, proceed_login)
     return je_video_ma_malya_enu_naam, known_face_lables, proceed_login
     
 # ----------------------------------------------------------------------- #
@@ -168,100 +177,107 @@ def recognizer(details, username, unique_id):
 # ----------------------------------------------------------------------- #
 # ----------------------------------------------------------------------- #
 
-def Recognizer(details):
-	video = cv2.VideoCapture(0)
+def Recognizer(details, username, unique_id):
+    video = cv2.VideoCapture(0)
 
-	known_face_encodings = []
-	known_face_names = []
+    known_face_encodings = []
+    known_face_names = []
 
-	# base_dir = os.path.dirname(os.path.abspath(__file__))
-	# image_dir = os.path.join(base_dir, "static")
-	# image_dir = os.path.join(image_dir, "profile_pics")
+    # base_dir = os.path.dirname(os.path.abspath(__file__))
+    # image_dir = os.path.join(base_dir, "static")
+    # image_dir = os.path.join(image_dir, "profile_pics")
 
-	# base_dir = os.getcwd()
-	base_dir = os.path.dirname(os.path.abspath(__file__))
-	# os.chdir("..")
-	base_dir = os.getcwd()
-	image_dir = os.path.join(base_dir,"{}\{}\{}".format('media','User_images',details['gender']))
-	# print(image_dir)
-	names = []
-
-
-	for root,dirs,files in os.walk(image_dir):
-		for file in files:
-			if file.endswith('jpg') or file.endswith('png'):
-				path = os.path.join(root, file)
-				img = face_recognition.load_image_file(path)
-				label = file[:len(file)-4]
-				img_encoding = face_recognition.face_encodings(img)[0]
-				known_face_names.append(label)
-				known_face_encodings.append(img_encoding)
-
-	face_locations = []
-	face_encodings = []
+    # base_dir = os.getcwd()
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # os.chdir("..")
+    base_dir = os.getcwd()
+    image_dir = os.path.join(base_dir,"{}\{}\{}".format('media','User_images',details['gender']))
+    # print(image_dir)
+    names = []
+    proceed_login = False
 
 
-	while True:	
-	
-		check, frame = video.read()
-		small_frame = cv2.resize(frame, (0,0), fx=0.5, fy= 0.5)
-		rgb_small_frame = small_frame[:,:,::-1]
+    for root,dirs,files in os.walk(image_dir):
+        for file in files:
+            if file.endswith('jpg') or file.endswith('png'):
+                path = os.path.join(root, file)
+                img = face_recognition.load_image_file(path)
+                label = file[:len(file)-4]
+                img_encoding = face_recognition.face_encodings(img)[0]
+                known_face_names.append(label)
+                known_face_encodings.append(img_encoding)
 
-		face_locations = face_recognition.face_locations(rgb_small_frame)
-		face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-		face_names = []
+    face_locations = []
+    face_encodings = []
 
 
-		for face_encoding in face_encodings:
 
-			matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
+    while True:	
 
-			face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)	
-			
-			try:
-				matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
+        check, frame = video.read()
+        small_frame = cv2.resize(frame, (0,0), fx=0.5, fy= 0.5)
+        rgb_small_frame = small_frame[:,:,::-1]
 
-				face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)
-				best_match_index = np.argmin(face_distances)
+        face_locations = face_recognition.face_locations(rgb_small_frame)
+        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+        face_names = []
 
-				if matches[best_match_index]:
-					name = known_face_names[best_match_index]
-					face_names.append(name)
-					if name not in names:
-						names.append(name)
-			except:
-				pass
 
-		if len(face_names) == 0:
-			for (top,right,bottom,left) in face_locations:
-				top*=2
-				right*=2
-				bottom*=2
-				left*=2
+        for face_encoding in face_encodings:
 
-				cv2.rectangle(frame, (left,top),(right,bottom), (0,0,255), 2)
+            matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
 
-				# cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
-				font = cv2.FONT_HERSHEY_DUPLEX
-				cv2.putText(frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
-		else:
-			for (top,right,bottom,left), name in zip(face_locations, face_names):
-				top*=2
-				right*=2
-				bottom*=2
-				left*=2
+            face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)	
+            
+            try:
+                matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
 
-				cv2.rectangle(frame, (left,top),(right,bottom), (0,255,0), 2)
+                face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)
+                best_match_index = np.argmin(face_distances)
 
-				# cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
-				font = cv2.FONT_HERSHEY_DUPLEX
-				cv2.putText(frame, name, (left, top), font, 0.8, (255,255,255),1)
+                if matches[best_match_index]:
+                    name = known_face_names[best_match_index]
+                    face_names.append(name)
+                    if name not in names:
+                        names.append(name)
+            except:
+                pass
 
-		cv2.imshow("Face Recognition Panel",frame)
+        if len(face_names) == 0:
+            for (top,right,bottom,left) in face_locations:
+                top*=2
+                right*=2
+                bottom*=2
+                left*=2
 
-		if cv2.waitKey(1) == ord('s'):
-			break
+                cv2.rectangle(frame, (left,top),(right,bottom), (0,0,255), 2)
 
-	video.release()
-	cv2.destroyAllWindows()
-	return names
+                # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
+                font = cv2.FONT_HERSHEY_DUPLEX
+                cv2.putText(frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
+                proceed_login = False
+        else:
+            for (top,right,bottom,left), name in zip(face_locations, face_names):
+                top*=2
+                right*=2
+                bottom*=2
+                left*=2
+
+                cv2.rectangle(frame, (left,top),(right,bottom), (0,255,0), 2)
+
+                # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
+                font = cv2.FONT_HERSHEY_DUPLEX
+                cv2.putText(frame, name, (left, top), font, 0.8, (255,255,255),1)
+                if (username+unique_id) in name:
+                    proceed_login = True
+                else:
+                    proceed_login = False
+
+        cv2.imshow("Face Recognition Panel",frame)
+
+        if cv2.waitKey(1) == ord('s'):
+            break
+
+    video.release()
+    cv2.destroyAllWindows()
+    return names, known_face_names, proceed_login
