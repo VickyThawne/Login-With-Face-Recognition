@@ -1,10 +1,12 @@
-from django.shortcuts import render, HttpResponse, redirect, get_object_or_404, reverse
+from django.shortcuts import render, HttpResponse, redirect, get_object_or_404, reverse, get_list_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from .models import UserProfile, User
 from .forms import UserProfileForm, AuthenticationForm
 from .recognizer import recognizer, Recognizer
+
+from login_details.models import LoginDetails
 
 from django.contrib.auth import (
     login,
@@ -18,6 +20,13 @@ from django.contrib.auth import (
 def home_view(request):
     context = {}
     context['data'] = 'some data'
+    try:
+        user = request.user
+        user = UserProfile.objects.get(user=user)
+        context['user'] = user
+        context['premium_data'] = LoginDetails.objects.filter(user=request.user)
+    except:
+        return redirect('recognizer:login')
     return render(request, 'recognizer/home.html', context=context)
 
 
@@ -38,6 +47,8 @@ def login_view(request):
                 messages.success(request, 'login sucsessful!')
                 uqid = get_uqid(request)
                 request.session['uqid'] = uqid
+                
+                request.session['user_pk'] = UserProfile.objects.get(user=user).pk
                 
                 login_form = AuthenticationForm(request.POST or None)
                 context['form'] = login_form
@@ -87,9 +98,11 @@ def signup_view(request):
 @login_required(login_url='recognizer:login')
 def profile_view(request, pk=None):
     instance = get_object_or_404(UserProfile, pk=pk)
+    login_instance = get_list_or_404(LoginDetails, user=request.user)
     context = {}
     if request.user == instance.user or request.user.is_staff:
         context['object'] = instance
+        context['login_object'] = login_instance
     return render(request, 'recognizer/profile.html', context=context)
 
 
@@ -103,6 +116,12 @@ def update_profile_view(request, pk=None):
         }
         if request.POST:
             if edit_form.is_valid():
+                
+                first_name = edit_form.cleaned_data.get('first_name')
+                user_instance = User.objects.get(pk=request.user.pk)
+                user_instance.first_name = first_name
+                user_instance.save()
+                
                 user = edit_form.save()
                 messages.success(request, "Profile Edited Sucsessfuly")
                 request.session['uqid'] = user.unique_id
@@ -163,6 +182,10 @@ def login_with_face(request):
         if str(request.user.username + user.unique_id) in names:
             context['login_detail'] = True
             user.login_proceed = login_proceed
+            
+            instance = LoginDetails.objects.create(user=request.user)
+            instance.save()
+            
             messages.success(request, 'now you canwatch premium content')
             return redirect('recognizer:home')
         else:
@@ -174,4 +197,14 @@ def login_with_face(request):
         
     return render(request, 'recognizer/home.html', context=context)
         
+        
+        
+        
+from django import template
+
+register = template.Library()
+
+@register.simple_tag
+def current_pk(user):
+    return UserProfile.objects.get(user=user).pk
     

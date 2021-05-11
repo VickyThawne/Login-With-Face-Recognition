@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
 {% block body_block %}
-
-
+<spacer type="vertical" width="1000" height="1000">  </spacer>
+<div class='container-fluid'>
 
 {% if messages %}
 
@@ -16,13 +16,33 @@
 
 
 {% endif %}
-
+<div >
+<p>
 {{ data }}
+<p>
+</div>
+<hr>
 
+<div class='container-sm'>
+{% if user.image and not user.login_proceed %}
 <form method='POST' action="{% url 'recognizer:login-with-face' %}">
 {% csrf_token %}
-<input class='form-control' type='submit' value='submit'>
+<input class='form-control btn btn-dark' type='submit' value='Recognize My Face'>
 </form>
+{% else %}{% endif %}
+</div>
 
 
+{% if premium_data %}
+<p>Previous Logins</p>
+{% for data in premium_data %}
+
+<ul class="list-group">
+  <li class="list-group-item">Logged in on {{ data.login_date }}  |  {{ data.login_time }}</li>
+  
+{% endfor %}
+</ul>
+{% endif %}
+
+</div>
 {% endblock %}

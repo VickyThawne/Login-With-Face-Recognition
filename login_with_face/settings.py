@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'recognizer',
+    'login_details',
 ]
 
 MIDDLEWARE = [

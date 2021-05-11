@@ -14,7 +14,8 @@ def recognizer(details, username, unique_id):
     video_face_encodings = []   # video capture ma je malya e face nu encoding
     video_face_locations = []   # video capture ma je malya e face nu encoding
     
-    je_video_ma_malya_enu_naam = []
+    je_video_ma_malya_enu_naam = []  # not repetative & return ready
+    face_names = []  # repetative
     
     best_match_index = None
     
@@ -80,36 +81,29 @@ def recognizer(details, username, unique_id):
             else:
                 video_face_encoding = video_face_encoding
             
-            
-            for face_enc in video_face_encoding:
-                
-                matches = face_recognition.compare_faces(
-                        known_face_encodings,
-                        np.array(face_enc),
-                        tolerance = 0.6
-                        )
-                face_distances = face_recognition.face_distance(known_face_encodings,face_enc)	
+            print(video_face_encoding)
+            for face_encoding in video_face_encoding:
+
+                matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
+
+                face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)	
                 
                 try:
-                    matches = face_recognition.compare_faces(
-                        known_face_encodings,
-                        np.array(face_enc),
-                        tolerance = 0.6
-                    )
-                    face_distance = face_recognition.face_distances(known_face_encodings, face_enc)
-                    
-                    best_match_index = np.argmin(face_distance)
-                    
+                    matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
+
+                    face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)
+                    best_match_index = np.argmin(face_distances)
+
                     if matches[best_match_index]:
                         name = known_face_lables[best_match_index]
+                        face_names.append(name)
                         if name not in je_video_ma_malya_enu_naam:
                             je_video_ma_malya_enu_naam.append(name)
-                
                 except:
                     pass
                 
             # jo video ma thobdu malyu pan verified nathi to
-            if len(je_video_ma_malya_enu_naam) == 0:
+            if len(face_names) == 0:
                 for (top, right, bottom, left) in video_face_locations:
                     
                     top*=2
@@ -124,7 +118,7 @@ def recognizer(details, username, unique_id):
                     cv2.putText(frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
                     
             #jo video ma thobdu malyu ane verified 6e
-            elif (username+unique_id) in je_video_ma_malya_enu_naam:
+            else:
                 for (top, right, bottom, left), name in video_face_locations, je_video_ma_malya_enu_naam:
                     
                     top*=2
@@ -137,21 +131,12 @@ def recognizer(details, username, unique_id):
                     font = cv2.FONT_HERSHEY_DUPLEX
                     cv2.putText(frame, name , (left, top), font, 0.8, (255,255,255),1)
                     
-                    proceed_login = True
+                    if (username+unique_id) in je_video_ma_malya_enu_naam:
+                        proceed_login = True
+                    else:
+                        proceed_login = False
+                        cv2.putText(frame, 'LOGIN FAILED', (10, 10), font, 0.8, (255,0,0),1)
                     
-            else:
-                for (top, right, bottom, left) in video_face_locations:
-                    
-                    top*=2
-                    right*=2
-                    bottom*=2
-                    left*=2
-                    
-                    cv2.rectangle(frame, (left,top),(right,bottom), (0,0,255), 2)
-
-                    # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
-                    font = cv2.FONT_HERSHEY_DUPLEX
-                    cv2.putText(frame, 'Login Failed', (left, top), font, 0.8, (255,255,255),1)
                    
     # ----------------------------------------------------------------------- #
      
@@ -275,7 +260,7 @@ def Recognizer(details, username, unique_id):
 
         cv2.imshow("Face Recognition Panel",frame)
 
-        if cv2.waitKey(1) == ord('s'):
+        if cv2.waitKey(1) == ord('q'):
             break
 
     video.release()

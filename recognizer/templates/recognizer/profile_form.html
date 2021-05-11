@@ -15,9 +15,13 @@
 <form method='POST' class='form-control' enctype="multipart/form-data">
 {% csrf_token %}
 {{ form.as_p }}
-<input class='form-control' type='submit' value='submit'>
+<input class='form-control btn btn-primary' type='submit' value='submit'>
+<br>
+</br>
+<hr>
 </form>
 </div>
+
 
 {% endblock %}
 

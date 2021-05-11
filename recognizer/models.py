@@ -51,10 +51,18 @@ class UserProfile(models.Model):
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_profile')
     unique_id = models.CharField(null=True, blank=True, max_length=120) 
-    gender = models.CharField(choices=GENDER_CHOICES, max_length=2)
-    birth_date = models.DateField(auto_now_add=True, null=True)
     image = models.ImageField(upload_to=user_image_path, null=True, blank=True)
+    about = models.CharField(max_length=30, null=True, blank=True)
+    gender = models.CharField(choices=GENDER_CHOICES, max_length=2)
+    birth_date = models.DateField(null=True)
+    phone_number = models.IntegerField(default='1234567890')
+    website = models.URLField(null=True, blank=True)
+    github_username = models.CharField(max_length=100, null=True, blank=True)
+    twitter_handle = models.CharField(max_length=100, null=True, blank=True)
+    instagram_username = models.CharField(max_length=100, null=True, blank=True)
+    facebook_username = models.CharField(max_length=100, null=True, blank=True)
     login_proceed = models.BooleanField(default=False)
+    
     
     def __str__(self):
         name = self.user.username + str(self.pk)

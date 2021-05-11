@@ -23,7 +23,7 @@
         <a class="nav-link" href="{% url 'main_app:starred-list' %}">Starred<span class="badge badge-light">{{ request.session.starred_count }}</span></a>
       </li>{% endcomment %}
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle" href="{% url 'recognizer:profile' pk='13' %}" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Account
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -31,11 +31,11 @@
           <a class="dropdown-item" href="{% url 'recognizer:login' %}">Login</a>
           <a class="dropdown-item" href="{% url 'recognizer:signup' %}">Sign-Up</a>
           {% else %}
-          <a class="dropdown-item" href="{% url 'recognizer:logout' %}">Logout</a>
+          <a class="dropdown-item" href="{% url 'recognizer:logout-cnf' %}">Logout</a>
           {% endif %}
           <div class="dropdown-divider"></div>
-          {% comment %} <a class="dropdown-item" href="{% url 'tag:list' %}">See Tags</a>
-          <a class="dropdown-item" href="{% url 'tag:create' %}">Add Tag</a> {% endcomment %}
+          <a class="dropdown-item" href="{% url 'recognizer:profile' pk='13' %}">See Profile</a>
+          {% comment %} <a class="dropdown-item" href="{% url 'tag:create' %}">Add Tag</a> {% endcomment %}
         </div>
       </li>
        
@@ -44,5 +44,7 @@
       <input class="form-control" type="search" name='q' placeholder="Search" aria-label="Search" value='{{ request.GET.q }}'>
       <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
     </form> {% endcomment %}
-  </div>
+
+
+
 </nav>
