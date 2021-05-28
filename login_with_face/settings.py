@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     
     'recognizer',
     'login_details',
+    
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [

@@ -78,7 +78,7 @@ def user_post_save_receiver(sender, instance, *args, **kwargs):
         obj = UserProfile.objects.create(user=instance)
         
     try:    
-        if obj.unique_id:
+        if obj.unique_id is None:
             obj.unique_id = unique_id_generator(obj)
             obj.save()
         else:
