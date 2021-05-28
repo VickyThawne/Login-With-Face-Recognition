@@ -53,7 +53,11 @@ def login_view(request):
                 login_form = AuthenticationForm(request.POST or None)
                 context['form'] = login_form
                 
-                return redirect('recognizer:home')
+                user_profile = UserProfile.objects.get(user=user)
+                if user_profile.image:
+                    return redirect('recognizer:home')
+                else:
+                    return redirect(reverse('recognizer:update-profile', kwargs={'pk': user.pk}))
             else:
                 messages.error(request, 'User not found signup first!')
                 return render(request, 'recognizer/login.html', context=context)
@@ -149,6 +153,7 @@ def logout_confirm_view(request):
 def logout_view(request):
     user = UserProfile.objects.get(user=request.user)
     user.login_proceed = False
+    user.save()
     logout(request)
     messages.success(request, "Logout Sucsessful")
     return redirect('recognizer:home')
@@ -179,18 +184,22 @@ def login_with_face(request):
         
         names, known_lables, login_proceed = Recognizer(details, username=user.user.username, unique_id=user.unique_id)
         
+        print(names, known_lables, login_proceed)
+        
         if str(request.user.username + user.unique_id) in names:
             context['login_detail'] = True
             user.login_proceed = login_proceed
             
             instance = LoginDetails.objects.create(user=request.user)
             instance.save()
+            user.save()
             
             messages.success(request, 'now you canwatch premium content')
             return redirect('recognizer:home')
         else:
             context['login_detail'] = False
             user.login_proceed = login_proceed
+            user.save()
             messages.error(request, 'stfu b** get your ass out of my website..')
             return redirect('recognizer:home')
         
@@ -206,5 +215,4 @@ register = template.Library()
 
 @register.simple_tag
 def current_pk(user):
-    return UserProfile.objects.get(user=user).pk
-    
+    return UserProfile.objects.get(user=user).pk   
