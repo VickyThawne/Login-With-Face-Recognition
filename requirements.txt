@@ -22,7 +22,7 @@ Django==3.2.3
 django-allauth==0.44.0
 dlib==19.22.0
 entrypoints==0.3
-face-recognition==1.4.0
+face-recognition
 face-recognition-models @ git+https://github.com/ageitgey/face_recognition_models@e67de717267507d1e9246de95692eb8be736ab61
 flatbuffers==1.12
 gast==0.4.0
