@@ -32,9 +32,6 @@ parso==0.8.2
 pickleshare==0.7.5
 pillow==8.2.0
 prompt-toolkit==3.0.18
-protobuf==3.17.0
-pyasn1==0.4.8
-pyasn1-modules==0.2.8
 pycparser==2.20
 Pygments==2.9.0
 PyJWT==2.1.0
