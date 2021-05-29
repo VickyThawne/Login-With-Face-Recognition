@@ -71,7 +71,11 @@ class UserProfile(models.Model):
     
     
 def user_post_save_receiver(sender, instance, *args, **kwargs):
-    obj = UserProfile.objects.get(user=instance)
+    try:
+        obj = UserProfile.objects.get(user=instance)
+    except:
+        obj = None
+    
     if obj is not None:
         pass
     else:
