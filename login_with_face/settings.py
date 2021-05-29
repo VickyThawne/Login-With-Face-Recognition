@@ -63,7 +63,7 @@ ROOT_URLCONF = 'login_with_face.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TAMPLATE_DIR],
+        'DIRS': [TAMPLATE_DIR, ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
