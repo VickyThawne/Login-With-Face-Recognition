@@ -203,7 +203,12 @@ def Recognizer(details, username, unique_id):
     while True:	
 
         check, frame = video.read()
-        small_frame = cv2.resize(frame, (0,0), fx=0.5, fy= 0.5, interpolation=cv2.INTER_AREA)
+        try:
+            small_frame = cv2.resize(frame, (0,0), fx=0.5, fy= 0.5, interpolation=cv2.INTER_AREA)
+            print(small_frame.shape)
+        except:
+            break
+    
         rgb_small_frame = small_frame[:,:,::-1]
 
         face_locations = face_recognition.face_locations(rgb_small_frame)
