@@ -58,21 +58,23 @@ def recognizer(details, username, unique_id):
     try:
         cap = cv2.VideoCapture(0)   #start the video camera
     except:
-        cap = cv2.VideoCapture(1)
+        try:
+            cap = cv2.VideoCapture(1)
+        except:
+            return print("nothing  found")
     
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    # width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    # height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     
     while True:
         
         ret, frame = cap.read()
-        small_frame = cv2.resize(frame, (0,0), fx=0.5, fy= 0.5, interpolation=cv2.INTER_AREA)
-        rgb_small_frame = small_frame[:,:,::-1]
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
         if ret:
             
-            video_face_location = face_recognition.face_locations(rgb_small_frame, model='hog')
-            video_face_encoding = face_recognition.face_encodings(rgb_small_frame,
+            video_face_location = face_recognition.face_locations(frame)
+            video_face_encoding = face_recognition.face_encodings(frame,
                                         video_face_location
                                     )
             if len(video_face_encoding) == 0:
@@ -106,41 +108,42 @@ def recognizer(details, username, unique_id):
             if len(face_names) == 0:
                 for (top, right, bottom, left) in video_face_locations:
                     
-                    top*=2
-                    right*=2
-                    bottom*=2
-                    left*=2
+                    # top*=2
+                    # right*=2
+                    # bottom*=2
+                    # left*=2
                     
                     cv2.rectangle(frame, (left,top),(right,bottom), (0,0,255), 2)
 
                     # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
                     font = cv2.FONT_HERSHEY_DUPLEX
                     cv2.putText(frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
+                    proceed_login = False
                     
             #jo video ma thobdu malyu ane verified 6e
             else:
                 for (top, right, bottom, left), name in video_face_locations, je_video_ma_malya_enu_naam:
                     
-                    top*=2
-                    right*=2
-                    bottom*=2
-                    left*=2
+                    # top*=2
+                    # right*=2
+                    # bottom*=2
+                    # left*=2
                     cv2.rectangle(frame, (left,top),(right,bottom), (0,0,255), 2)
 
                     # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
                     font = cv2.FONT_HERSHEY_DUPLEX
                     cv2.putText(frame, name , (left, top), font, 0.8, (255,255,255),1)
-                    
-                    if (username+unique_id) in je_video_ma_malya_enu_naam:
+                    if (username+unique_id) in name:
                         proceed_login = True
                     else:
                         proceed_login = False
-                        cv2.putText(frame, 'LOGIN FAILED', (10, 10), font, 0.8, (255,0,0),1)
+        
                     
                    
     # ----------------------------------------------------------------------- #
      
             # chalo have video batai do....
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             cv2.imshow("Face Recognition Panel", frame)
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -200,7 +203,7 @@ def Recognizer(details, username, unique_id):
     while True:	
 
         check, frame = video.read()
-        small_frame = cv2.resize(frame, (0,0), fx=0.5, fy= 0.5)
+        small_frame = cv2.resize(frame, (0,0), fx=0.5, fy= 0.5, interpolation=cv2.INTER_AREA)
         rgb_small_frame = small_frame[:,:,::-1]
 
         face_locations = face_recognition.face_locations(rgb_small_frame)
