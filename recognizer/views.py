@@ -83,6 +83,7 @@ def signup_view(request):
                 user = User.objects.create(username=username, email=email, password=password)
                 # user.set_password(password)
                 user.save()
+                login(request, user=user)
                 
                 signup_form = AuthenticationForm(request.POST or None)
                 context['form'] = signup_form
