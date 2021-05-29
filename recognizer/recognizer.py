@@ -66,7 +66,7 @@ def recognizer(details, username, unique_id):
     while True:
         
         ret, frame = cap.read()
-        small_frame = cv2.resize(frame, (0,0), fx=0.5, fy= 0.5)
+        small_frame = cv2.resize(frame, (0,0), fx=0.5, fy= 0.5, interpolation=cv2.INTER_AREA)
         rgb_small_frame = small_frame[:,:,::-1]
         
         if ret:
