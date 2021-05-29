@@ -18,13 +18,13 @@
 {% endif %}
 <div >
 <p>
-{{ data }}
+{{ data }} {% if not user.image %} <a href="{% url 'recognizer:update-profile' pk=user.pk %}"> Update Profile {% else %}{% endif %}
 <p>
 </div>
 <hr>
 
 <div class='container-sm'>
-{% if user.image and not user.login_proceed %}
+{% if user.image %}
 <form method='POST' action="{% url 'recognizer:login-with-face' %}">
 {% csrf_token %}
 <input class='form-control btn btn-dark' type='submit' value='Recognize My Face'>

@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse, redirect, get_object_or_404, reverse, get_list_or_404
+from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404, reverse, get_list_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
@@ -19,7 +19,7 @@ from django.contrib.auth import (
 # Create your views here.
 def home_view(request):
     context = {}
-    context['data'] = 'some data'
+    context['data'] = 'Add your cool photo to your profile !'
     try:
         user = request.user
         user = UserProfile.objects.get(user=user)
@@ -102,42 +102,55 @@ def signup_view(request):
 
 @login_required(login_url='recognizer:login')
 def profile_view(request, pk=None):
-    instance = get_object_or_404(UserProfile, pk=pk)
-    login_instance = get_list_or_404(LoginDetails, user=request.user)
+    instance = None
+    login_instance = None
+    try:
+        instance = UserProfile.objects.get(pk=pk)
+    except:
+        pass
+    
+    try:
+        login_instance = LoginDetails.objects.filter(user=request.user)
+    except: 
+        pass
+    
     context = {}
-    if request.user == instance.user or request.user.is_staff:
-        context['object'] = instance
-        context['login_object'] = login_instance
+    # if request.user == instance.user or request.user.is_staff:
+    context['object'] = instance
+    context['login_object'] = login_instance
     return render(request, 'recognizer/profile.html', context=context)
 
 
 @login_required(login_url='recognizer:login')
 def update_profile_view(request, pk=None):
-    instance = get_object_or_404(UserProfile, pk=pk)
+    try: 
+        instance = UserProfile.objects.get(pk=pk)
+    except:
+        instance = None
     edit_form = UserProfileForm(request.POST or None, instance=instance)
-    if instance.user == request.user or request.user.is_superuser:
-        context = {
+    context = {
             'form':edit_form,
         }
+    if instance.user == request.user or request.user.is_superuser:
         if request.POST:
-            if edit_form.is_valid():
-                
-                first_name = edit_form.cleaned_data.get('first_name')
-                user_instance = User.objects.get(pk=request.user.pk)
-                user_instance.first_name = first_name
-                user_instance.save()
-                
+            if edit_form.is_valid:
+                img = request.FILES.get('image')
                 user = edit_form.save()
+                instance.image = img
+                instance.save()
+                
                 messages.success(request, "Profile Edited Sucsessfuly")
                 request.session['uqid'] = user.unique_id
-                return reverse("recognizer:profile", kwargs={'pk': pk})
+                context = {
+                    'form':edit_form,
+                }
+                return HttpResponseRedirect(reverse("recognizer:profile", kwargs={'pk': pk}))
             else:
                 context = {
                     'form':edit_form,
                 }
                 messages.error(request, "Somthing is wrong , i can feel it")
-    else:
-        messages.error(request, "Somthing is wrong , i can feel it part 2")
+
     return render(request, 'recognizer/profile_form.html', context=context)
 
 

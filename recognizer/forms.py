@@ -18,14 +18,18 @@ class AuthenticationForm(forms.Form):
         
         
 class UserProfileForm(forms.ModelForm):
-    image = forms.ImageField(error_messages={'required': 'Please Upload clear photo of your self!'})
-    first_name = forms.CharField()
+    birth_date = forms.DateField(widget = forms.SelectDateWidget())
     class Meta():
         model = UserProfile
-        exclude = ['unique_id', 'user', 'login_proceed']
+        fields = ['image', 'about', 'gender', 'birth_date',
+                  'phone_number', 'website', 'github_username',
+                  'twitter_handle', 'instagram_username', 'facebook_username']
 
         
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
+            
+            
+    
