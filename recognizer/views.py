@@ -40,7 +40,7 @@ def login_view(request):
             email = login_form.cleaned_data.get('email')
             password= login_form.cleaned_data.get('password')
             
-            user = authenticate(request, username=username, email=email, password=password)
+            user = authenticate(request, username=username, password=password)
             
             if user is not None:
                 login(request, user=user)
@@ -78,7 +78,7 @@ def signup_view(request):
             email = signup_form.cleaned_data.get('email')
             password = signup_form.cleaned_data.get('password')
             
-            user = authenticate(request, username=username, email=email, password=password)
+            user = authenticate(request, username=username, password=password)
             if user is None:
                 user = User.objects.create(username=username, email=email, password=password)
                 # user.set_password(password)
@@ -88,8 +88,8 @@ def signup_view(request):
                 context['form'] = signup_form
                 messages.success(request, "Sign up Sucsessful")
                 
-                uqid = get_uqid(request=request)
-                request.session['uqid'] = uqid
+                # uqid = get_uqid(request=request)
+                # request.session['uqid'] = uqid
                 return redirect('recognizer:home')
             else:
                 messages.error(request, 'User already exists!')
