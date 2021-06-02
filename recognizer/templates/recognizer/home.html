@@ -27,11 +27,11 @@
 {% if user.image %}
 <form method='POST' action="{% url 'recognizer:login-with-face' %}">
 {% csrf_token %}
-<input onclick="runCam()" class='form-control btn btn-dark' type='submit' value='Recognize My Face'>
+<input class='form-control btn btn-dark' type='submit' value='Recognize My Face'>
 </form>
 {% else %}{% endif %}
 </div>
-<div id="my_camera"> </div>
+<img src="{% url 'recognizer:login-with-face' %}">
 
 {% if premium_data %}
 <p>Previous Logins</p>
