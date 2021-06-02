@@ -7,3 +7,5 @@ libsm6
 libxext6
 libgl1-mesa-glx
 libgl1
+libqt4-dev
+libopencv-*
