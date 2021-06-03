@@ -1,9 +1,13 @@
+from django import shortcuts
 import cv2
 import face_recognition
 import os
 import numpy as np
 
+from django.shortcuts import redirect
 from django.conf import settings
+
+from login_details.models import LoginDetails
 
 def recognizer(details, username, unique_id):
 
@@ -265,6 +269,7 @@ def Recognizer(details, username, unique_id):
                 else:
                     proceed_login = False
 
+        cv2.imshow("Face Recognition Panel",frame)
         ret, jpeg = cv2.imencode('.jpg', frame)
 
         if cv2.waitKey(1) == ord('q'):
@@ -272,20 +277,26 @@ def Recognizer(details, username, unique_id):
 
     video.release()
     cv2.destroyAllWindows()
+    
     print(jpeg.tobytes())
     return (names, known_face_names, proceed_login, jpeg.tobytes())
 
 
 class RecognizerClass(object):
     
-    def __init__(self, details=None, username=None, unique_id=None):
+    def __init__(self, details=None, username=None, unique_id=None, request=None):
         
         self.username = username
+        self.request = request
         self.unique_id = unique_id
         self.details = details
         self.proceed_login = False
         
-        self.video = cv2.VideoCapture(0)
+        
+        ###################################
+        
+        
+        self.video = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
         self.known_face_encodings = []
         self.known_face_names = []
@@ -319,6 +330,8 @@ class RecognizerClass(object):
 
     def __del__(self):
         self.video.release()
+        cv2.destroyAllWindows()
+        
 
     def get_frame(self):
         self.check, self.frame = self.video.read()
@@ -384,10 +397,31 @@ class RecognizerClass(object):
                 else:
                     self.proceed_login = False
 
+        # cv2.imshow('frame', self.frame)
         ret, jpeg = cv2.imencode('.jpg', self.frame)
+        
+        if cv2.waitKey(0) & 0xFF == ord('q'):
+            return redirect
+        
+
         
         return (self.names, self.known_face_names, self.proceed_login, jpeg.tobytes())
 
-    def update(self):
-        while True:
-            (self.grabbed, self.frame) = self.video.read()
+            
+    def check_login_proceed(self):
+        
+        names, known_lables , login_proceed, jpeg = self.get_frame()
+        user = self.details['user']
+        print(names, known_lables, login_proceed)
+
+        if str(self.request.user.username + user.unique_id) in names:
+            user.login_proceed = login_proceed
+            
+            instance = LoginDetails.objects.create(user=self.request.user)
+            instance.save()
+            user.save()
+            return redirect('recognizer:home')
+        else:
+            user.login_proceed = login_proceed
+            user.save()
+            return redirect('recognizer:home')

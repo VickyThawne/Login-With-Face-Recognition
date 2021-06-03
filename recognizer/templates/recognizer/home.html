@@ -16,6 +16,7 @@
 
 
 {% endif %}
+
 <div >
 <p>
 {{ data }} {% if not user.image %} <a href="{% url 'recognizer:update-profile' pk=user.pk %}"> Update Profile {% else %}{% endif %}
@@ -25,13 +26,18 @@
 
 <div class='container-sm'>
 {% if user.image %}
-<form method='POST' action="{% url 'recognizer:login-with-face' %}">
-{% csrf_token %}
-<input class='form-control btn btn-dark' type='submit' value='Recognize My Face'>
-</form>
+  <form method='POST' action="{% url 'recognizer:login-with-face' %}">
+  {% csrf_token %}
+  <input class='form-control btn btn-dark' type='submit' value='Recognize My Face' name='submit'>
+  </form>
 {% else %}{% endif %}
 </div>
+
+{% if request.POST %}
 <img src="{% url 'recognizer:login-with-face' %}">
+{% else %}
+{% endif %}
+
 
 {% if premium_data %}
 <p>Previous Logins</p>
@@ -50,17 +56,5 @@
 
 </div>
 
-<script>
 
-function runCam(){
-    Webcam.set({
-        width: 320,
-        height: 240,
-        image_format: 'jpeg',
-        jpeg_quality: 90
-        });
-    Webcam.attach('#my_camera');
-  }
-
-</script>
 {% endblock %}

@@ -9,7 +9,8 @@ from .views import (
     profile_view,
     logout_view,
     logout_confirm_view,
-    login_with_face,
+    login_with_face, # Login noramlly with my code # with normal function
+    login_with_face_part2, # login with recognizer Class
 )
 
 app_name = 'recognizer'
@@ -22,6 +23,6 @@ urlpatterns = [
     path('logout-confirm/', logout_confirm_view, name='logout-cnf'),
     path('profile/<int:pk>', profile_view, name='profile'),
     path('profile/<int:pk>/update', update_profile_view, name='update-profile'),
-    path('login-with-face', login_with_face, name='login-with-face')
+    path('login-with-face', login_with_face_part2, name='login-with-face')
     
 ]

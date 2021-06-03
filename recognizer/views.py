@@ -2,6 +2,7 @@ from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http.response import StreamingHttpResponse
+from django.views.decorators import gzip
 
 from .models import UserProfile, User
 from .forms import UserProfileForm, AuthenticationForm
@@ -16,12 +17,7 @@ from django.contrib.auth import (
     logout
 )
 
-def gen(camera):
-    while True:
-        (names, known_face_names, proceed_login, jpeg) = camera.get_frame()
-        frame = jpeg
-        yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
 
 
 # Create your views here.
@@ -194,7 +190,12 @@ def get_uqid(request):
 #################################################333
 ###################################################3
 
-
+def gen(camera):
+    while True:
+        (names, known_face_names, proceed_login, jpeg) = camera.get_frame()
+        frame = jpeg
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 
 
@@ -223,6 +224,7 @@ def login_with_face(request):
         
         print(names, known_lables, login_proceed)
         
+        
         if str(request.user.username + user.unique_id) in names:
             context['login_detail'] = True
             user.login_proceed = login_proceed
@@ -232,67 +234,43 @@ def login_with_face(request):
             user.save()
             
             messages.success(request, 'now you canwatch premium content')
-            # return redirect('recognizer:home')
+            return redirect('recognizer:home')
         else:
             context['login_detail'] = False
             user.login_proceed = login_proceed
             user.save()
             messages.error(request, 'stfu b** get your ass out of my website..')
-            # return redirect('recognizer:home')
+            return redirect('recognizer:home')
         
-        
-        # return StreamingHttpResponse(gen(RecognizerClass(details, username=user.user.username, unique_id=user.unique_id)),
-		# 			content_type='multipart/x-mixed-replace; boundary=frame')
     return render(request, 'recognizer/home.html', context=context)
+        
+    
+
 
 
 
 
 @login_required(login_url = 'recognizer:login')
+@gzip.gzip_page
 def login_with_face_part2(request):
-    context = {}
-    jpeg = None
-    details = None
-    user = None
-    if request.method == 'POST':
-        try:
-            user = UserProfile.objects.get(user=request.user)
+    details = {}
+    
+    try:
+        user = UserProfile.objects.get(user=request.user)
 
-            gender = user.gender
-            details = {
-            'gender':gender,
-            'username':user.user.username,
-            'unique_id':user.unique_id,
-            'user':user,
-            }
-        except:
-            details = None
-        
-        names, known_lables, login_proceed, jpeg = Recognizer(details, username=user.user.username, unique_id=user.unique_id)
-        
-        print(names, known_lables, login_proceed)
-        
-        if str(request.user.username + user.unique_id) in names:
-            context['login_detail'] = True
-            user.login_proceed = login_proceed
-            
-            instance = LoginDetails.objects.create(user=request.user)
-            instance.save()
-            user.save()
-            
-            messages.success(request, 'now you canwatch premium content')
-            # return redirect('recognizer:home')
-        else:
-            context['login_detail'] = False
-            user.login_proceed = login_proceed
-            user.save()
-            messages.error(request, 'stfu b** get your ass out of my website..')
-            # return redirect('recognizer:home')
-        
-        
-        # return StreamingHttpResponse(gen(RecognizerClass(details, username=user.user.username, unique_id=user.unique_id)),
-		# 			content_type='multipart/x-mixed-replace; boundary=frame')
-    return render(request, 'recognizer/home.html', context=context)
+        gender = user.gender
+        details = {
+        'gender':gender,
+        'username':user.user.username,
+        'unique_id':user.unique_id,
+        'user':user,
+        }
+    except:
+        details = None
+
+    
+    return StreamingHttpResponse(gen(RecognizerClass(details, username=details['username'], unique_id=details['unique_id'])),
+    			content_type='multipart/x-mixed-replace; boundary=frame')
         
         
         
