@@ -398,12 +398,10 @@ class RecognizerClass(object):
                 else:
                     self.proceed_login = False
                     
-        names, known_lables , login_proceed, jpeg = (self.names, self.known_face_names, self.proceed_login)
         user = self.details['user']
-        print(names, known_lables, login_proceed)
 
-        if str(self.request.user.username + self.details['unique_id']) in names:
-            user.login_proceed = self.login_proceed
+        if str(self.request.user.username + self.details['unique_id']) in self.names:
+            user.login_proceed = self.proceed_login
             user.save()
         
             
@@ -419,7 +417,8 @@ class RecognizerClass(object):
 
             
     def check_login_proceed(self):
-        if self.user.login_proceed == True:
+        user = self.details['user']
+        if user.login_proceed == True:
             instance = LoginDetails.objects.create(user=self.request.user)
             instance.save()
         return redirect('recognizer:home')
