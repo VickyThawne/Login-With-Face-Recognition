@@ -331,6 +331,7 @@ class RecognizerClass(object):
     def __del__(self):
         self.video.release()
         cv2.destroyAllWindows()
+        self.check_login_proceed()
         
 
     def get_frame(self):
@@ -396,32 +397,29 @@ class RecognizerClass(object):
                     self.proceed_login = True
                 else:
                     self.proceed_login = False
+                    
+        names, known_lables , login_proceed, jpeg = (self.names, self.known_face_names, self.proceed_login)
+        user = self.details['user']
+        print(names, known_lables, login_proceed)
+
+        if str(self.request.user.username + self.details['unique_id']) in names:
+            user.login_proceed = self.login_proceed
+            user.save()
+        
+            
 
         # cv2.imshow('frame', self.frame)
         ret, jpeg = cv2.imencode('.jpg', self.frame)
         
-        if cv2.waitKey(0) & 0xFF == ord('q'):
-            return redirect
-        
-
+        # if cv2.waitKey(0) & 0xFF == ord('q'):
+            
+            
         
         return (self.names, self.known_face_names, self.proceed_login, jpeg.tobytes())
 
             
     def check_login_proceed(self):
-        
-        names, known_lables , login_proceed, jpeg = self.get_frame()
-        user = self.details['user']
-        print(names, known_lables, login_proceed)
-
-        if str(self.request.user.username + user.unique_id) in names:
-            user.login_proceed = login_proceed
-            
+        if self.user.login_proceed == True:
             instance = LoginDetails.objects.create(user=self.request.user)
             instance.save()
-            user.save()
-            return redirect('recognizer:home')
-        else:
-            user.login_proceed = login_proceed
-            user.save()
-            return redirect('recognizer:home')
+        return redirect('recognizer:home')

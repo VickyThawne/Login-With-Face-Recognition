@@ -1,6 +1,20 @@
 {% extends 'base.html' %}
 
 {% block body_block %}
+<style>
+#container {
+	margin: 0px auto;
+	width: 500px;
+	height: 375px;
+	border: 10px #333 solid;
+}
+#videoElement {
+	width: 500px;
+	height: 375px;
+	background-color: #666;
+}
+</style>
+
 <spacer type="vertical" width="1000" height="1000">  </spacer>
 <div class='container-fluid'>
 
@@ -34,9 +48,13 @@
 </div>
 
 {% if request.POST %}
-<img src="{% url 'recognizer:login-with-face' %}">
+<div id="container">
+  <img id="videoElement" src="{% url 'recognizer:login-with-face' %}">
+</div>
 {% else %}
 {% endif %}
+
+
 
 
 {% if premium_data %}

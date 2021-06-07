@@ -11,6 +11,7 @@ from .views import (
     logout_confirm_view,
     login_with_face, # Login noramlly with my code # with normal function
     login_with_face_part2, # login with recognizer Class
+    # login_with_face_part3, # login with part 3 which consists of all the nessecity things inside on function!
 )
 
 app_name = 'recognizer'
