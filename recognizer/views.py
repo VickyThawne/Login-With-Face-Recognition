@@ -270,10 +270,9 @@ def login_with_face_part2(request):
     except:
         details = None
         
+
     
-    
-    
-    return StreamingHttpResponse(gen(Recognizer(details, username=user.user.username, unique_id=user.unique_id, request=request)),
+    return StreamingHttpResponse(gen(RecognizerClass(details, username=user.user.username, unique_id=user.unique_id, request=request)),
     			content_type='multipart/x-mixed-replace; boundary=frame')
         
         
