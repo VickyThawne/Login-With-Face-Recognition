@@ -8,11 +8,16 @@
 	height: 375px;
 	border: 10px #333 solid;
 }
-#videoElement {
+#img {
 	width: 500px;
 	height: 375px;
 	background-color: #666;
 }
+
+.myCanvas{
+       background-image: url("{{ url 'recognizer:login-with-face' }}"); 
+}
+
 </style>
 
 <spacer type="vertical" width="1000" height="1000">  </spacer>
@@ -50,6 +55,7 @@
 
 {% if request.POST %}
 
+<div id='containercam'>
 <div width="640px" height="480px" style="display:inline-block">
         <h1>Image</h1>
         <img id="img" src="{% url 'recognizer:login-with-face' %}">
@@ -59,7 +65,7 @@
     <h1>Canvas</h1>
     <canvas id="canvas" width="640px" height="480px"></canvas>
 </div>
-
+</div>
 
 {% comment %} <div id="container">
   <img id="videoElement" src="{% url 'recognizer:login-with-face' %}">
