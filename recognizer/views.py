@@ -256,7 +256,6 @@ def login_with_face(request):
 @gzip.gzip_page
 def login_with_face_part2(request):
     details = {}
-    
     try:
         user = UserProfile.objects.get(user=request.user)
 
