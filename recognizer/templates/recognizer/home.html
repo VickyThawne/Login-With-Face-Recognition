@@ -47,10 +47,23 @@
 {% else %}{% endif %}
 </div>
 
+
 {% if request.POST %}
-<div id="container">
-  <img id="videoElement" src="{% url 'recognizer:login-with-face' %}">
+
+<div width="640px" height="480px" style="display:inline-block">
+        <h1>Image</h1>
+        <img id="img" src="{% url 'recognizer:login-with-face' %}">
+    </div>
+
+<div width="640px" height="480px" style="display:inline-block">
+    <h1>Canvas</h1>
+    <canvas id="canvas" width="640px" height="480px"></canvas>
 </div>
+
+
+{% comment %} <div id="container">
+  <img id="videoElement" src="{% url 'recognizer:login-with-face' %}">
+</div> {% endcomment %}
 {% else %}
 {% endif %}
 
@@ -74,5 +87,24 @@
 
 </div>
 
+
+<script >
+
+    var ctx = document.getElementById("canvas").getContext('2d');
+    var img = new Image();
+    img.src = "{% url 'recognizer:login-with-face' %}";
+
+    // need only for static image
+    //img.onload = function(){   
+    //    ctx.drawImage(img, 0, 0);
+    //};
+
+    // need only for animated image
+    function refreshCanvas(){
+        ctx.drawImage(img, 0, 0);
+    };
+    window.setInterval("refreshCanvas()", 50);
+
+</script>
 
 {% endblock %}
