@@ -419,6 +419,7 @@ class RecognizerClass(object):
     def check_login_proceed(self):
         user = self.details['user']
         if user.login_proceed == True:
-            instance = LoginDetails.objects.create(user=self.request.user)
-            instance.save()
+            if str(self.request.user.username + self.details['unique_id']) in self.names:
+                instance = LoginDetails.objects.create(user=self.request.user)
+                instance.save()
         return redirect('recognizer:home')

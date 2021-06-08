@@ -8,7 +8,7 @@
 	height: 375px;
 	border: 10px #333 solid;
 }
-#img {
+#videoElement {
 	width: 500px;
 	height: 375px;
 	background-color: #666;
@@ -53,9 +53,15 @@
 </div>
 
 
-{% if request.POST %}
+<!-- -------------------------------------------------------    -->
 
-<div id='containercam'>
+<div id="container">
+	<video autoplay="true" id="videoElement">
+	
+	</video>
+</div>
+
+{% comment %} <div id='containercam'>
 <div width="640px" height="480px" style="display:inline-block">
         <h1>Image</h1>
         <img id="img" src="{% url 'recognizer:login-with-face' %}">
@@ -65,13 +71,13 @@
     <h1>Canvas</h1>
     <canvas id="canvas" width="640px" height="480px"></canvas>
 </div>
-</div>
+</div> {% endcomment %}
 
 {% comment %} <div id="container">
   <img id="videoElement" src="{% url 'recognizer:login-with-face' %}">
 </div> {% endcomment %}
-{% else %}
-{% endif %}
+
+<!-- -------------------------------------------------------    -->
 
 
 
@@ -96,20 +102,61 @@
 
 <script >
 
-    var ctx = document.getElementById("canvas").getContext('2d');
-    var img = new Image();
-    img.src = "{% url 'recognizer:login-with-face' %}";
+var video = document.querySelector("#videoElement");
 
-    // need only for static image
-    //img.onload = function(){   
-    //    ctx.drawImage(img, 0, 0);
-    //};
+if (navigator.mediaDevices.getUserMedia) {
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(function (stream) {
+      video.srcObject = stream;
+    })
+    .catch(function (err0r) {
+      console.log("Something went wrong!");
+    });
+}
 
-    // need only for animated image
-    function refreshCanvas(){
-        ctx.drawImage(img, 0, 0);
-    };
-    window.setInterval("refreshCanvas()", 50);
+function stop(e) {
+  var stream = video.srcObject;
+  var tracks = stream.getTracks();
+
+  for (var i = 0; i < tracks.length; i++) {
+    var track = tracks[i];
+    track.stop();
+  }
+
+  video.srcObject = null;
+}
+
+
+{% comment %} let video = document.getElementById('videoInput');
+let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
+let cap = new cv.VideoCapture(video);
+
+const FPS = 30;
+function processVideo() {
+    try {
+        if (!streaming) {
+            // clean and stop.
+            src.delete();
+            dst.delete();
+            return;
+        }
+        let begin = Date.now();
+        // start processing.
+        cap.read(src);
+        cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+        cv.imshow('canvasOutput', dst);
+        // schedule the next one.
+        let delay = 1000/FPS - (Date.now() - begin);
+        setTimeout(processVideo, delay);
+    } catch (err) {
+        utils.printError(err);
+    }
+};
+
+// schedule the first one.
+setTimeout(processVideo, 0); {% endcomment %}
+
 
 </script>
 

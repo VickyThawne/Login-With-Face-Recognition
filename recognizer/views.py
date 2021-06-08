@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404, reverse, get_list_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http.response import StreamingHttpResponse
+from django.http.response import HttpResponse, StreamingHttpResponse
 from django.views.decorators import gzip
 
 import cv2
@@ -256,23 +256,26 @@ def login_with_face(request):
 @gzip.gzip_page
 def login_with_face_part2(request):
     details = {}
-    try:
-        user = UserProfile.objects.get(user=request.user)
+    if request.POST:
+        try:
+            user = UserProfile.objects.get(user=request.user)
 
-        gender = user.gender
-        details = {
-        'gender':gender,
-        'username':user.user.username,
-        'unique_id':user.unique_id,
-        'user':user,
-        }
-    except:
-        details = None
+            gender = user.gender
+            details = {
+            'gender':gender,
+            'username':user.user.username,
+            'unique_id':user.unique_id,
+            'user':user,
+            }
+        except:
+            details = None
+            
+
         
-
-    
-    return StreamingHttpResponse(gen(RecognizerClass(details, username=user.user.username, unique_id=user.unique_id, request=request)),
-    			content_type='multipart/x-mixed-replace; boundary=frame')
+        return StreamingHttpResponse(gen(RecognizerClass(details, username=user.user.username, unique_id=user.unique_id, request=request)),
+                    content_type='multipart/x-mixed-replace; boundary=frame')
+    else:
+        return HttpResponse('shit')
         
         
         
