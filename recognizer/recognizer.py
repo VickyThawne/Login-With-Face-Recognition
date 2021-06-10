@@ -170,6 +170,7 @@ def recognizer(details, username, unique_id):
 # ----------------------------------------------------------------------- #
 
 def Recognizer(details, username, unique_id):
+    # javascript no video ahiya lavvano
     video = cv2.VideoCapture(0)
 
     known_face_encodings = []
