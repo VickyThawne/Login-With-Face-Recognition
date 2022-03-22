@@ -4,6 +4,9 @@ import cv2
 import face_recognition
 import os
 import numpy as np
+import socket
+import struct
+from io import BytesIO
 
 from django.shortcuts import redirect
 from django.conf import settings
@@ -11,7 +14,9 @@ from django.conf import settings
 from login_details.models import LoginDetails
 
 def recognizer(details, username, unique_id):
-
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect(('localhost', 8080))
+    
     known_face_encodings = []   # User uploaded image's encodings
     known_face_locations = []   # User uploaded image's locations
     known_face_lables = []      # User uploaded image's lables
@@ -146,9 +151,18 @@ def recognizer(details, username, unique_id):
                     
                    
     # ----------------------------------------------------------------------- #
-     
+            
             # chalo have video batai do....
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            
+            memfile = BytesIO()
+            np.save(memfile, frame)
+            memfile.seek(0)
+            data = memfile.read()
+
+            # Send form byte array: frame size + frame content
+            client_socket.sendall(struct.pack("L", len(data)) + data)
+            
             cv2.imshow("Face Recognition Panel", frame)
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -205,8 +219,7 @@ def Recognizer(details, username, unique_id):
     face_locations = []
     face_encodings = []
 
-    print("face_encodings and names"+known_face_encodings, known_face_names)
-
+    
 
     while True:	
 

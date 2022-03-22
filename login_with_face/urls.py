@@ -20,5 +20,6 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('recognizer.urls', namespace='recognizer'))
+    path('', include('recognizer.urls', namespace='recognizer')),
+    path('teacher/', include('teacher.urls', namespace='teacher'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

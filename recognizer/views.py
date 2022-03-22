@@ -7,7 +7,7 @@ from django.views.decorators import gzip
 import cv2
 
 from .models import UserProfile, User
-from .forms import UserProfileForm, AuthenticationForm
+from .forms import UserProfileForm, AuthenticationForm, LectureDetailsForm
 from .recognizer import recognizer, Recognizer, frame_check
 
 from login_details.models import LoginDetails
@@ -26,6 +26,8 @@ from django.contrib.auth import (
 def home_view(request):
     context = {}
     context['data'] = 'Add your cool photo to your profile !'
+    login_details_form = LectureDetailsForm(request.POST or None)
+    context['login_details_form'] = login_details_form
     try:
         user = request.user
         user = UserProfile.objects.get(user=user)
@@ -33,6 +35,52 @@ def home_view(request):
         context['premium_data'] = LoginDetails.objects.filter(user=request.user)
     except:
         return redirect('recognizer:login')
+    
+    # this is new 
+    if request.method == 'POST' and login_details_form.is_valid():
+
+        try:
+            user = UserProfile.objects.get(user=request.user)
+             
+            gender = user.gender
+            details = {
+            'gender':gender,
+            'username':user.user.username,
+            'unique_id':user.unique_id,
+            'user':user,
+            }
+            print(details)
+        except:
+            details = None
+        
+        names, known_lables, login_proceed = Recognizer(details, username=user.user.username, unique_id=user.unique_id)
+        
+        print(names, known_lables, login_proceed)
+        print(request.user.username + user.unique_id)
+
+        if str(request.user.username + user.unique_id) in names:
+            context['login_detail'] = True
+            user.login_proceed = login_proceed
+            instance = LoginDetails.objects.create(user=request.user, lecture=login_details_form.cleaned_data.get('lecture'), teacher=login_details_form.cleaned_data.get('teacher'))
+            # instance.user=request.user
+            instance.save()
+            user.save()
+            
+            context['login_details_form'] = login_details_form
+            
+            messages.success(request, 'now you canwatch premium content')
+            return redirect('recognizer:home')
+        else:
+            context['login_detail'] = False
+            user.login_proceed = login_proceed
+            user.save()
+            
+            context['login_details_form'] = login_details_form
+            
+            messages.error(request, 'stfu b** get your ass out of my website..')
+            return redirect('recognizer:home')
+    
+    
     return render(request, 'recognizer/home.html', context=context)
 
 
@@ -123,6 +171,7 @@ def profile_view(request, pk=None):
     context = {}
     # if request.user == instance.user or request.user.is_staff:
     context['object'] = instance
+    print(instance)
     context['login_object'] = login_instance
     return render(request, 'recognizer/profile.html', context=context)
 
@@ -196,9 +245,13 @@ def get_uqid(request):
 
 @login_required(login_url = 'recognizer:login')
 def login_with_face(request):
+    
+
     context = {}
+
     if request.method == 'POST':
-        print("posted")
+        print("teacher:"+str(request.POST.get('teacher')))
+        print("lec:"+str(request.POST.get('lecture')))
         try:
             user = UserProfile.objects.get(user=request.user)
              
@@ -217,12 +270,12 @@ def login_with_face(request):
         
         print(names, known_lables, login_proceed)
         print(request.user.username + user.unique_id)
-        print(str(request.user.username + user.unique_id) in names)
+
         if str(request.user.username + user.unique_id) in names:
             context['login_detail'] = True
             user.login_proceed = login_proceed
-            
-            instance = LoginDetails.objects.create(user=request.user)
+            instance = LoginDetails.objects.create(user=request.user )
+            instance.user=request.user
             instance.save()
             user.save()
             
@@ -232,46 +285,34 @@ def login_with_face(request):
             context['login_detail'] = False
             user.login_proceed = login_proceed
             user.save()
+            context['login_details_form'] = login_details_form
             messages.error(request, 'stfu b** get your ass out of my website..')
             return redirect('recognizer:home')
+    print(context)
+    return render(request, 'recognizer/home.html', context)
         
-        
-    return render(request, 'recognizer/home.html', context=context)
-        
-    
+# from streamer import Streamer
 
 
 
+# def gen():
+#     streamer = Streamer('localhost', 8080)
+#     streamer.start()
 
+#     while True:
+#         if streamer.streaming:
+#             yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + streamer.get_jpeg() + b'\r\n\r\n')
 
-@login_required(login_url = 'recognizer:login')
-@gzip.gzip_page
-def login_with_face_part2(request):
-    details = {}
-    if request.POST:
-        try:
-            user = UserProfile.objects.get(user=request.user)
+# @app.route('/')
+# def index():
+#   return render_template('index.html')
 
-            gender = user.gender
-            details = {
-            'gender':gender,
-            'username':user.user.username,
-            'unique_id':user.unique_id,
-            'user':user,
-            }
-        except:
-            details = None
-            
+# @app.route('/video_feed')
+# def video_feed():
+#   return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
         
-        return StreamingHttpResponse(gen(RecognizerClass(details, username=user.user.username, unique_id=user.unique_id, request=request)),
-                    content_type='multipart/x-mixed-replace; boundary=frame')
-    else:
-        return HttpResponse('shit')
-        
-def test_frame(request):
-    frame_check()
-    return render(request, 'recognizer/home.html', context={})  
+ 
         
         
 
