@@ -27,14 +27,22 @@
           Account
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-        {% if not request.user.is_authenticated %}
+          {% if not request.user.is_authenticated %}
           <a class="dropdown-item" href="{% url 'recognizer:login' %}">Login</a>
           <a class="dropdown-item" href="{% url 'recognizer:signup' %}">Sign-Up</a>
           {% else %}
           <a class="dropdown-item" href="{% url 'recognizer:logout-cnf' %}">Logout</a>
           {% endif %}
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="{% if request.user_pk %}"{% url 'recognizer:profile' pk=request.user_pk %}"{% else %}{% endif %}">See Profile</a>
+          
+          {% for obj in request.user.user_profile.all %}
+          <a class="dropdown-item" href="{% if request.user.is_authenticated %}{% url 'recognizer:profile' pk=obj.pk %}{% else %}#{% endif %}">See Profile</a>
+          {% endfor %}
+
+          {% if request.user.teacher_profile %}
+          <a class="dropdown-item" href="{% if request.user %}{% url 'teacher:dashboard' %}{% else %}{% endif %}">Dashboard</a>
+          {% else %} {% endif %}
+
           {% comment %} <a class="dropdown-item" href="{% url 'tag:create' %}">Add Tag</a> {% endcomment %}
         </div>
       </li>

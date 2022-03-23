@@ -8,5 +8,5 @@ app_name = 'teacher'
 
 
 urlpatterns = [
-    path('<int:pk>', profile_view, name='dashboard'),
+    path('', profile_view, name='dashboard'),
 ]    

@@ -37,12 +37,14 @@
 
 <div >
 <p>
-{{ data }} {% if not user.image %} <a href="{% url 'recognizer:update-profile' pk=user.pk %}"> Update Profile {% else %}{% endif %}
+{{ data }} {% if not user.image %} <a href="{% url 'recognizer:update-profile' pk=user.pk %}"> Update Profile {% else %}{% endif %}</a>
 <p>
 </div>
 <hr>
 
 <div class='container-sm'>
+{% if teacher %}
+{% else %}
 {% if user.image %}
   <form method='POST' action="{% url 'recognizer:home' %}">
   {{ login_details_form.as_p }}
@@ -50,11 +52,17 @@
   <input class='form-control btn btn-dark' type='submit' value='Recognize My Face' name='submit'>
   </form>
 {% else %}{% endif %}
+{% endif %}
 </div>
 
 
 
-
+{{ request.user }}</br>
+{{ request.user.pk }}</br>
+{{ request.user.user_profile.all }}</br>
+{% for obj in request.user.user_profile.all %}
+{{ obj.pk }}</br>
+{% endfor %}
 
 {% if premium_data %}
 <p>Previous Logins</p>

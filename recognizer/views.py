@@ -6,7 +6,7 @@ from django.views.decorators import gzip
 
 import cv2
 
-from .models import UserProfile, User
+from .models import TeacherProfileModel, UserProfile, User
 from .forms import UserProfileForm, AuthenticationForm, LectureDetailsForm
 from .recognizer import recognizer, Recognizer, frame_check
 
@@ -28,10 +28,17 @@ def home_view(request):
     context['data'] = 'Add your cool photo to your profile !'
     login_details_form = LectureDetailsForm(request.POST or None)
     context['login_details_form'] = login_details_form
+    teacher=False
     try:
         user = request.user
-        user = UserProfile.objects.get(user=user)
+        try:
+            user = TeacherProfileModel.objects.get(user=user)
+            teacher = True
+        except:
+            user = UserProfile.objects.get(user=user)
+        
         context['user'] = user
+        context['teacher'] = teacher
         context['premium_data'] = LoginDetails.objects.filter(user=request.user)
     except:
         return redirect('recognizer:login')
@@ -108,10 +115,16 @@ def login_view(request):
                 context['form'] = login_form
                 
                 user_profile = UserProfile.objects.get(user=user)
+                if user.teacher_profile:
+                    if user_profile.image:
+                        return redirect('recognizer:home')
+                    else:
+                        return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
+                    
                 if user_profile.image:
                     return redirect('recognizer:home')
                 else:
-                    return redirect(reverse('recognizer:update-profile', kwargs={'pk': user.pk}))
+                    return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
             else:
                 messages.error(request, 'User not found signup first!')
                 return render(request, 'recognizer/login.html', context=context)
@@ -143,9 +156,10 @@ def signup_view(request):
                 context['form'] = signup_form
                 messages.success(request, "Sign up Sucsessful")
                 
+                user_profile = user.user_profile
                 # uqid = get_uqid(request=request)
                 # request.session['uqid'] = uqid
-                return redirect('recognizer:home')
+                return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
             else:
                 messages.error(request, 'User already exists!')
                 context['form'] = signup_form
@@ -173,6 +187,10 @@ def profile_view(request, pk=None):
     context['object'] = instance
     print(instance)
     context['login_object'] = login_instance
+    try:
+        context['teacher'] = User.objects.get(pk=pk).teacher_profile
+    except:
+        pass
     return render(request, 'recognizer/profile.html', context=context)
 
 
@@ -285,7 +303,7 @@ def login_with_face(request):
             context['login_detail'] = False
             user.login_proceed = login_proceed
             user.save()
-            context['login_details_form'] = login_details_form
+
             messages.error(request, 'stfu b** get your ass out of my website..')
             return redirect('recognizer:home')
     print(context)

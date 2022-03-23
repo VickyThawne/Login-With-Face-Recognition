@@ -48,7 +48,7 @@
               <li class="dropdown nav-item">
                 <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
                   <div class="photo">
-                    <img src="/static/assets/img/anime3.png" alt="Profile Photo">
+                    <img src="{{ user_profile.image.url }}" alt="Profile Photo">
                   </div>
                   <b class="caret d-none d-lg-block d-xl-block"></b>
                   <p class="d-lg-none">
@@ -56,9 +56,13 @@
                   </p>
                 </a>
                 <ul class="dropdown-menu dropdown-navbar">
-                  <li class="nav-link"><a href="/page-user.html" class="nav-item dropdown-item">Profile</a></li>
+                  {% for obj in request.user.user_profile.all %}
+                  <li class="nav-link"><a href="{% url 'recognizer:profile' pk=obj.pk %}" class="nav-item dropdown-item">Profile</a></li>
+                  {% endfor %}
+                  <li class="nav-link"><a href="{% url 'recognizer:home' %}" class="nav-item dropdown-item">Home</a></li>
                   <li class="dropdown-divider"></li>
-                  <li class="nav-link"><a href="#" class="nav-item dropdown-item">Log out</a></li>
+                  <li class="nav-link"><a href="{% url 'recognizer:logout' %}" class="nav-item dropdown-item">Log out</a></li>
+                  
                 </ul>
               </li>
               <li class="separator d-lg-none"></li>

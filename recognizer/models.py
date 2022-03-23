@@ -140,20 +140,13 @@ class TeacherProfileModel(models.Model):
     )
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='teacher_profile')
-    unique_id = models.CharField(null=True, blank=True, max_length=120) 
-    image = models.ImageField(upload_to=teacher_image_path, null=True, blank=True)
+
+
     about = models.CharField(max_length=30, null=True, blank=True)
-    gender = models.CharField(choices=GENDER_CHOICES, max_length=2, blank=True, null=True)
+
     college = models.CharField(choices=COLLEGE_CHOICES, max_length=5, blank=True, null=True)
     company = models.CharField(max_length=100,null=True, blank=True)
     branch = models.CharField(choices=BRANCH_CHOICES,max_length=3, blank=True, null=True)
-    birth_date = models.DateField(null=True, blank=True)
-    phone_number = models.IntegerField(default='1234567890')
-    website = models.URLField(null=True, blank=True)
-    github_username = models.CharField(max_length=100, null=True, blank=True)
-    twitter_handle = models.CharField(max_length=100, null=True, blank=True)
-    instagram_username = models.CharField(max_length=100, null=True, blank=True)
-    facebook_username = models.CharField(max_length=100, null=True, blank=True)
     login_proceed = models.BooleanField(default=True)
     
     
@@ -161,14 +154,6 @@ class TeacherProfileModel(models.Model):
         name = self.user.username + str(self.pk)
         return "{} {}".format(self.user.username, self.pk)
     
-def teacher_post_save_receiver(sender, instance, *args, **kwargs):
-    if instance.unique_id is None:
-        instance.unique_id = unique_id_generator(instance)
-        instance.save()
-    else:
-        pass
-    
-post_save.connect(teacher_post_save_receiver, sender=TeacherProfileModel)
 
 
 class LectrueModel(models.Model):
