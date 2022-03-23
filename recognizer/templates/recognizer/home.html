@@ -56,14 +56,6 @@
 </div>
 
 
-
-{{ request.user }}</br>
-{{ request.user.pk }}</br>
-{{ request.user.user_profile.all }}</br>
-{% for obj in request.user.user_profile.all %}
-{{ obj.pk }}</br>
-{% endfor %}
-
 {% if premium_data %}
 <p>Previous Logins</p>
 {% for data in premium_data %}

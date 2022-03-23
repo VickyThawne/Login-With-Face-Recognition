@@ -10,7 +10,8 @@ def profile_view(request):
     context={}
     teacher = TeacherProfileModel.objects.get(user=request.user)
     context['teacher'] = teacher
-    context['user_profile'] = teacher.user.user_profile
+    context['user_profile'] = teacher.user.user_profile.all().first()
+    print(teacher.user.user_profile)
     context['students_attended_teachers_lecture'] = LoginDetails.objects.filter(teacher__user__username=request.user.username).order_by('-login_date').order_by('-login_time')
     
     

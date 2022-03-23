@@ -185,10 +185,15 @@ def profile_view(request, pk=None):
     context = {}
     # if request.user == instance.user or request.user.is_staff:
     context['object'] = instance
+    context['teacher'] = False
     print(instance)
     context['login_object'] = login_instance
     try:
-        context['teacher'] = User.objects.get(pk=pk).teacher_profile
+        if User.objects.get(pk=pk).teacher_profile.all():
+            context['teacher'] = True
+            print('yes')
+        else:
+            print('no')
     except:
         pass
     return render(request, 'recognizer/profile.html', context=context)
