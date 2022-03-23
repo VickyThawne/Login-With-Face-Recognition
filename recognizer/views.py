@@ -84,7 +84,7 @@ def home_view(request):
             
             context['login_details_form'] = login_details_form
             
-            messages.error(request, 'stfu b** get your ass out of my website..')
+            messages.error(request, 'get out of my website..')
             return redirect('recognizer:home')
     
     

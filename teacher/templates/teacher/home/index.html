@@ -149,7 +149,7 @@
                     </td>
                     <td>
                       <p class="title">GDPR Compliance</p>
-                      <p class="text-muted">The GDPR is a regulation that requires businesses to protect the personal data and privacy of Europe citizens for transactions that occur within EU member states.</p>
+                      <p class="text-muted">{% for obj in students_attended_teachers_lecture %} {{ obj }} {% endfor %}</p>
                     </td>
                     <td class="td-actions text-right">
                       <button type="button" rel="tooltip" title="" class="btn btn-link" data-original-title="Edit Task">
