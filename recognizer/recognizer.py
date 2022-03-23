@@ -185,6 +185,11 @@ def recognizer(details, username, unique_id):
 # ----------------------------------------------------------------------- #
 
 def Recognizer(details, username, unique_id):
+    
+    def destroy_recognizer(self):
+            self.video.release()
+            cv2.destroyAllWindows()
+    
     # javascript no video ahiya lavvano
     print("start")
     try:
@@ -227,86 +232,91 @@ def Recognizer(details, username, unique_id):
     face_encodings = []
 
     
+    try:
+        while True:	
 
-    while True:	
-
-        check, frame = video.read()
-        try:
-            small_frame = cv2.resize(frame, (0,0), fx=0.5, fy= 0.5, interpolation=cv2.INTER_AREA)
-        except:
-            break
-    
-        rgb_small_frame = small_frame[:,:,::-1]
-
-        face_locations = face_recognition.face_locations(rgb_small_frame)
-        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-        face_names = []
-
-
-        for face_encoding in face_encodings:
-
-            matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
-
-            face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)	
-            
+            check, frame = video.read()
             try:
+                small_frame = cv2.resize(frame, (0,0), fx=0.5, fy= 0.5, interpolation=cv2.INTER_AREA)
+            except:
+                break
+        
+            rgb_small_frame = small_frame[:,:,::-1]
+
+            face_locations = face_recognition.face_locations(rgb_small_frame)
+            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+            face_names = []
+
+            for face_encoding in face_encodings:
+
                 matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
 
-                face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)
-                best_match_index = np.argmin(face_distances)
+                face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)	
+                
+                try:
+                    matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
 
-                if matches[best_match_index]:
-                    name = known_face_names[best_match_index]
-                    print("name:"+name)
-                    face_names.append(name)
-                    if name not in names:
-                        names.append(name)
-                        print("name array:"+names)
-            except:
-                pass
+                    face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)
+                    best_match_index = np.argmin(face_distances)
 
-        if len(face_names) == 0:
-            for (top,right,bottom,left) in face_locations:
-                top*=2
-                right*=2
-                bottom*=2
-                left*=2
+                    if matches[best_match_index]:
+                        name = known_face_names[best_match_index]
+                        print("name:"+name)
+                        face_names.append(name)
+                        if name not in names:
+                            names.append(name)
+                            print("name array:"+names)
+                except:
+                    pass
 
-                cv2.rectangle(frame, (left,top),(right,bottom), (0,0,255), 2)
+            if len(face_names) == 0:
+                for (top,right,bottom,left) in face_locations:
+                    top*=2
+                    right*=2
+                    bottom*=2
+                    left*=2
 
-                # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
-                font = cv2.FONT_HERSHEY_DUPLEX
-                cv2.putText(frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
-                proceed_login = False
-        else:
-            for (top,right,bottom,left), name in zip(face_locations, face_names):
-                top*=2
-                right*=2
-                bottom*=2
-                left*=2
+                    cv2.rectangle(frame, (left,top),(right,bottom), (0,0,255), 2)
 
-                cv2.rectangle(frame, (left,top),(right,bottom), (0,255,0), 2)
-
-                # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
-                font = cv2.FONT_HERSHEY_DUPLEX
-                cv2.putText(frame, name, (left, top), font, 0.8, (255,255,255),1)
-                print(username+unique_id)
-                if str(username+unique_id) in name:
-                    proceed_login = True
-                else:
+                    # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
+                    font = cv2.FONT_HERSHEY_DUPLEX
+                    cv2.putText(frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
                     proceed_login = False
+            else:
+                for (top,right,bottom,left), name in zip(face_locations, face_names):
+                    top*=2
+                    right*=2
+                    bottom*=2
+                    left*=2
 
-        cv2.imshow("Face Recognition Panel",frame)
-        # ret, jpeg = cv2.imencode('.jpg', frame)
+                    cv2.rectangle(frame, (left,top),(right,bottom), (0,255,0), 2)
 
-        if cv2.waitKey(1) == ord('q'):
-            break
+                    # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
+                    font = cv2.FONT_HERSHEY_DUPLEX
+                    cv2.putText(frame, name, (left, top), font, 0.8, (255,255,255),1)
+                    print(username+unique_id)
+                    if str(username+unique_id) in name:
+                        proceed_login = True
+                        print('will break')
+                        raise StopIteration
+                    else:
+                        proceed_login = False
+            
+            cv2.imshow("Face Recognition Panel",frame)
+            # ret, jpeg = cv2.imencode('.jpg', frame)
 
+            if cv2.waitKey(1) == ord('q'):
+                break
+        
+    except StopIteration:
+        pass
     video.release()
     cv2.destroyAllWindows()
     print(names, known_face_names, proceed_login)
     # print(jpeg.tobytes())
     return (names, known_face_names, proceed_login) #jpeg.tobytes())
+
+    
 
 
 # class RecognizerClass(object):
